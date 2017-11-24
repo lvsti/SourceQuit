@@ -8,6 +8,24 @@
 
 import Cocoa
 
+
+struct WatchdogConfig {
+    enum Threshold: Int {
+        case over1GB = 0x100
+        case over2GB = 0x101
+        case over5GB = 0x102
+    }
+    
+    enum Action: Int {
+        case kill = 0x200
+        case warn = 0x201
+    }
+
+    var isEnabled: Bool = false
+    var threshold: Threshold = .over1GB
+    var action: Action = .kill
+}
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -23,6 +41,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var actionItems: [NSMenuItem] { return [actionKillItem, actionWarnItem] }
 
     private var statusItem: NSStatusItem!
+    
+    private var watchdogConfig = WatchdogConfig()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let statusBar = NSStatusBar.system
@@ -45,12 +65,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func toggleWatchdog(_ sender: NSMenuItem) {
+        watchdogConfig.isEnabled = !watchdogConfig.isEnabled
+        sender.state = watchdogConfig.isEnabled ? .on : .off
+
     }
     
     @IBAction func changeWatchdogThreshold(_ sender: NSMenuItem) {
+        watchdogConfig.threshold = WatchdogConfig.Threshold(rawValue: sender.tag)!
+        sender.state = .on
+        
+        for item in thresholdItems where item != sender {
+            item.state = .off
+        }
+
     }
 
     @IBAction func changeWatchdogAction(_ sender: NSMenuItem) {
+        watchdogConfig.action = WatchdogConfig.Action(rawValue: sender.tag)!
+        sender.state = .on
+        
+        for item in actionItems where item != sender {
+            item.state = .off
+        }
+        
+    
+    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        if thresholdItems.contains(menuItem) || actionItems.contains(menuItem) {
+            return watchdogConfig.isEnabled
+        }
+
+        return true
+    }
     }
     
 
