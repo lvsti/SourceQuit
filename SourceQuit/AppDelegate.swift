@@ -26,6 +26,11 @@ struct WatchdogConfig {
     var action: Action = .kill
 }
 
+struct WatchdogState {
+    var isShowingWarning: Bool = false
+    var timer: Timer?
+}
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -43,13 +48,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     
     private var watchdogConfig = WatchdogConfig()
+    private var watchdogState = WatchdogState()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let statusBar = NSStatusBar.system
         statusItem = statusBar.statusItem(withLength: NSStatusItem.variableLength)
         
-        statusItem.image = NSImage(named: NSImage.Name(rawValue: "statusicon"))
-        statusItem.image?.isTemplate = true
+        updateStatusIcon()
         
         NSMenu.setMenuBarVisible(false)
 
@@ -62,12 +67,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func killSourceKitService(_ sender: Any) {
         Process.launchedProcess(launchPath: "/usr/bin/pkill", arguments: ["-9", "SourceKitService"])
+        watchdogState.isShowingWarning = false
+        updateStatusIcon()
     }
     
     @IBAction func toggleWatchdog(_ sender: NSMenuItem) {
         watchdogConfig.isEnabled = !watchdogConfig.isEnabled
         sender.state = watchdogConfig.isEnabled ? .on : .off
 
+        updateWatchdog()
     }
     
     @IBAction func changeWatchdogThreshold(_ sender: NSMenuItem) {
@@ -78,6 +86,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             item.state = .off
         }
 
+        updateWatchdog()
     }
 
     @IBAction func changeWatchdogAction(_ sender: NSMenuItem) {
@@ -88,6 +97,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             item.state = .off
         }
         
+        updateWatchdog()
+    }
     
     override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         if thresholdItems.contains(menuItem) || actionItems.contains(menuItem) {
@@ -96,8 +107,77 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         return true
     }
+
+    private func updateStatusIcon() {
+        if watchdogState.isShowingWarning {
+            statusItem.image = #imageLiteral(resourceName: "statusicon-warning")
+        }
+        else {
+            statusItem.image = #imageLiteral(resourceName: "statusicon")
+            statusItem.image?.isTemplate = true
+        }
     }
     
+    private func updateWatchdog() {
+        watchdogState.timer?.invalidate()
+        watchdogState.timer = Timer.scheduledTimer(timeInterval: 10,
+                                                   target: self,
+                                                   selector: #selector(watchdogTimerDidFire),
+                                                   userInfo: nil,
+                                                   repeats: true)
+    }
+    
+    @objc private func watchdogTimerDidFire() {
+        let ps = Process()
+        ps.launchPath = "/bin/ps"
+        ps.arguments = ["x", "-o", "rss,comm"]
 
+        let pipe = Pipe()
+        ps.standardOutput = pipe
+        
+        ps.launch()
+        ps.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: String.Encoding.utf8) else {
+            return
+        }
+
+        var sksStats: String?
+        output.enumerateLines { line, stop in
+            if line.hasSuffix("SourceKitService.xpc/Contents/MacOS/SourceKitService") {
+                sksStats = line
+                stop = true
+            }
+        }
+
+        guard let stats = sksStats else { return }
+        let segments = stats.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: false)
+        let memoryFootprint = (String(segments.first!) as NSString).longLongValue
+        
+        NSLog("SourceKitService real memory footprint: \(memoryFootprint)")
+        
+        switch watchdogConfig.threshold {
+        case .over5GB where memoryFootprint > 5 * 1024 * 1024 * 1024,
+             .over2GB where memoryFootprint > 2 * 1024 * 1024 * 1024,
+             .over1GB where memoryFootprint > 1 * 1024 * 1024 * 1024:
+            switch watchdogConfig.action {
+            case .warn:
+                if !watchdogState.isShowingWarning {
+                    watchdogState.isShowingWarning = true
+                    updateStatusIcon()
+                }
+            case .kill:
+                killSourceKitService(self)
+            }
+        default:
+            if watchdogState.isShowingWarning {
+                watchdogState.isShowingWarning = false
+                updateStatusIcon()
+            }
+            break
+        }
+
+    }
 }
 
