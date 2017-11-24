@@ -11,6 +11,17 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
+    @IBOutlet private var statusMenu: NSMenu!
+    
+    @IBOutlet private var threshold1GBItem: NSMenuItem!
+    @IBOutlet private var threshold2GBItem: NSMenuItem!
+    @IBOutlet private var threshold5GBItem: NSMenuItem!
+    private var thresholdItems: [NSMenuItem] { return [threshold1GBItem, threshold2GBItem, threshold5GBItem] }
+    
+    @IBOutlet private var actionKillItem: NSMenuItem!
+    @IBOutlet private var actionWarnItem: NSMenuItem!
+    private var actionItems: [NSMenuItem] { return [actionKillItem, actionWarnItem] }
+
     private var statusItem: NSStatusItem!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -22,44 +33,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         NSMenu.setMenuBarVisible(false)
 
-        let menu = NSMenu(title: statusItem.title!)
-        let menuItems = buildMenuItems()
-        
-        for item in menuItems {
-            menu.addItem(item)
-        }
-        
-        statusItem.menu = menu
+        statusItem.menu = statusMenu
     }
-    
-    private func buildMenuItems() -> [NSMenuItem] {
-        var items: [NSMenuItem] = []
-        
-        items.append(NSMenuItem(title: "Kill com.apple.dt.SKAgent",
-                                action: #selector(killSKAgent(_:)),
-                                keyEquivalent: ""))
-        items.append(NSMenuItem(title: "Kill SourceKitService",
-                                action: #selector(killSourceKitService(_:)),
-                                keyEquivalent: ""))
-        items.append(.separator())
-        items.append(NSMenuItem(title: "Quit SourceQuit",
-                                action: #selector(quit(_:)),
-                                keyEquivalent: ""))
-        
-        return items
-    }
-    
-    @objc private func killSKAgent(_ sender: Any) {
+
+    @IBAction func killSKAgent(_ sender: Any) {
         Process.launchedProcess(launchPath: "/usr/bin/pkill", arguments: ["-9", "com.apple.dt.SKAgent"])
     }
 
-    @objc private func killSourceKitService(_ sender: Any) {
+    @IBAction func killSourceKitService(_ sender: Any) {
         Process.launchedProcess(launchPath: "/usr/bin/pkill", arguments: ["-9", "SourceKitService"])
     }
-
-    @objc private func quit(_ sender: Any) {
-        NSApplication.shared.terminate(nil)
+    
+    @IBAction func toggleWatchdog(_ sender: NSMenuItem) {
     }
+    
+    @IBAction func changeWatchdogThreshold(_ sender: NSMenuItem) {
+    }
+
+    @IBAction func changeWatchdogAction(_ sender: NSMenuItem) {
+    }
+    
 
 }
 

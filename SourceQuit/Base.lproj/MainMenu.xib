@@ -11,7 +11,91 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
-        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="SourceQuit" customModuleProvider="target"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="SourceQuit" customModuleProvider="target">
+            <connections>
+                <outlet property="actionKillItem" destination="QW8-sR-Gqg" id="Flb-YI-bmV"/>
+                <outlet property="actionWarnItem" destination="kF1-v8-xgj" id="a0K-WN-NPW"/>
+                <outlet property="statusMenu" destination="cK8-68-o9B" id="hpS-d9-9My"/>
+                <outlet property="threshold1GBItem" destination="zId-o3-mzB" id="euS-d4-YWa"/>
+                <outlet property="threshold2GBItem" destination="P7v-9R-QUj" id="G9t-S2-fYZ"/>
+                <outlet property="threshold5GBItem" destination="vng-Ya-bRK" id="Txk-Kt-MkA"/>
+            </connections>
+        </customObject>
+        <menu id="cK8-68-o9B">
+            <items>
+                <menuItem title="Kill SourceKitService" id="N2x-Ey-OId">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="killSourceKitService:" target="Voe-Tx-rLC" id="FQC-AD-luE"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Kill com.apple.dt.SKAgent" id="bg7-b0-PuU">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="killSKAgent:" target="Voe-Tx-rLC" id="YfI-JQ-Go3"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="lZ0-92-9Zn"/>
+                <menuItem title="Watchdog" id="euE-8e-m5H">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Watchdog" id="Fmz-R9-ppE">
+                        <items>
+                            <menuItem title="Enabled" id="fYn-Im-RDP">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleWatchdog:" target="Voe-Tx-rLC" id="HrI-xV-rsa"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="XUt-DV-rZ6"/>
+                            <menuItem title="When SourceKitService leaks over:" enabled="NO" id="8hy-P1-0hX">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="1 GB" state="on" tag="256" indentationLevel="1" id="zId-o3-mzB">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="changeWatchdogThreshold:" target="Voe-Tx-rLC" id="6n1-3h-FfB"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="2 GB" tag="257" indentationLevel="1" id="P7v-9R-QUj">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="changeWatchdogThreshold:" target="Voe-Tx-rLC" id="FcA-f3-y1K"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="5 GB" tag="258" indentationLevel="1" id="vng-Ya-bRK">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="changeWatchdogThreshold:" target="Voe-Tx-rLC" id="sH8-Ko-mSz"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="bZ0-pC-wUE"/>
+                            <menuItem title="Then:" enabled="NO" id="cQf-7Q-QEX">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Kill It With Fire" state="on" tag="512" indentationLevel="1" id="QW8-sR-Gqg">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="changeWatchdogAction:" target="Voe-Tx-rLC" id="q5B-qL-x0z"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Change Status Icon Color" tag="513" indentationLevel="1" id="kF1-v8-xgj">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="changeWatchdogAction:" target="Voe-Tx-rLC" id="cu5-eT-X93"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="uSD-Mb-8wy"/>
+                <menuItem title="Quit SourceQuit" id="nvH-c2-Yhu">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="terminate:" target="-2" id="jq4-2r-8I4"/>
+                    </connections>
+                </menuItem>
+            </items>
+        </menu>
     </objects>
 </document>
