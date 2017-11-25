@@ -16,6 +16,8 @@
             <connections>
                 <outlet property="actionKillItem" destination="QW8-sR-Gqg" id="Flb-YI-bmV"/>
                 <outlet property="actionWarnItem" destination="kF1-v8-xgj" id="a0K-WN-NPW"/>
+                <outlet property="enabledItem" destination="fYn-Im-RDP" id="JEJ-55-Cnh"/>
+                <outlet property="footprintItem" destination="Hgh-8b-Mc1" id="pfz-eM-aXq"/>
                 <outlet property="statusMenu" destination="cK8-68-o9B" id="hpS-d9-9My"/>
                 <outlet property="threshold1GBItem" destination="zId-o3-mzB" id="euS-d4-YWa"/>
                 <outlet property="threshold2GBItem" destination="P7v-9R-QUj" id="G9t-S2-fYZ"/>
@@ -37,6 +39,9 @@
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="lZ0-92-9Zn"/>
+                <menuItem title="Memory Footprint: XXX GB" enabled="NO" id="Hgh-8b-Mc1">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
                 <menuItem title="Watchdog" id="euE-8e-m5H">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Watchdog" id="Fmz-R9-ppE">
