@@ -26,6 +26,30 @@ struct WatchdogConfig {
     var action: Action = .kill
 }
 
+extension WatchdogConfig {
+    
+    func saveToPreferences() {
+        UserDefaults.standard.set(isEnabled, forKey: "IsEnabled")
+        UserDefaults.standard.set(threshold.rawValue, forKey: "Threshold")
+        UserDefaults.standard.set(action.rawValue, forKey: "Action")
+    }
+
+    static func loadFromPreferences() -> WatchdogConfig? {
+        let isEnabled = UserDefaults.standard.bool(forKey: "IsEnabled")
+        let rawThreshold = UserDefaults.standard.integer(forKey: "Threshold")
+        let rawAction = UserDefaults.standard.integer(forKey: "Action")
+        
+        guard
+            let threshold = Threshold(rawValue: rawThreshold),
+            let action = Action(rawValue: rawAction)
+        else {
+            return nil
+        }
+        
+        return WatchdogConfig(isEnabled: isEnabled, threshold: threshold, action: action)
+    }
+}
+
 struct WatchdogState {
     var isShowingWarning: Bool = false
     var timer: Timer?
@@ -47,9 +71,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var statusItem: NSStatusItem!
     
-    private var watchdogConfig = WatchdogConfig()
+    private var watchdogConfig: WatchdogConfig {
+        didSet {
+            watchdogConfig.saveToPreferences()
+            updateMenus()
+            evaluateState()
+        }
+    }
+    
     private var watchdogState = WatchdogState()
-
+    
+    override init() {
+        self.watchdogConfig = WatchdogConfig.loadFromPreferences() ?? .init()
+    }
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
         let statusBar = NSStatusBar.system
         statusItem = statusBar.statusItem(withLength: NSStatusItem.variableLength)
