@@ -93,6 +93,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = statusBar.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.menu = statusMenu
 
+        updateMenus()
         updateStatusIcon()
         
         NSMenu.setMenuBarVisible(false)
