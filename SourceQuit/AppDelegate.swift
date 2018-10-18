@@ -131,7 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         watchdogConfig.action = WatchdogConfig.Action(rawValue: sender.tag)!
     }
     
-    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         if thresholdItems.contains(menuItem) || actionItems.contains(menuItem) {
             return watchdogConfig.isEnabled
         }
